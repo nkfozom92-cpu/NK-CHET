@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff">
+<title>Nk messenger — Real-time Messenger</title>
+<style>
+:root{--blue:#087cf0;--ink:#17191f;--muted:#7b8190;--line:#e9edf3;--bg:#f5f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,"Noto Sans Bengali",sans-serif;color:var(--ink)}button,input,textarea{font:inherit}button{cursor:pointer;border:0}
+.app{max-width:520px;height:100dvh;min-height:520px;margin:auto;background:#fff;display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 0 28px #17255412}
+header{padding:18px 16px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}.brand{font-size:25px;font-weight:800;color:var(--blue);letter-spacing:-.7px;flex:1}.user-email{font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.btn{border-radius:20px;background:#eaf4ff;color:var(--blue);padding:9px 13px;font-weight:700}.btn.primary{background:var(--blue);color:white}.btn.light{background:#f1f3f7;color:#555}.btn.danger{background:#fff0f0;color:#c22}
+.search{margin:13px 16px;height:44px;border-radius:24px;background:#f1f3f7;display:flex;align-items:center;padding:0 14px;gap:9px}.search input{border:0;outline:0;background:transparent;width:100%}
+.toolbar{display:flex;gap:8px;padding:0 16px 12px;border-bottom:1px solid var(--line)}.toolbar button{font-size:13px;padding:7px 13px;border-radius:18px;background:#f0f2f6;color:#666}.toolbar button.active{background:#e8f3ff;color:var(--blue)}
+.list{overflow:auto;flex:1}.chat-row{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer}.chat-row:hover{background:#f8faff}.avatar{width:54px;height:54px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#b9d7f5;color:#155a9e;font-weight:800;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.info{flex:1;min-width:0}.name{font-weight:700;margin-bottom:6px}.preview{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stamp{font-size:11px;color:#858b96;align-self:flex-start}
+.empty{text-align:center;padding:30px 22px;color:var(--muted);font-size:14px;line-height:1.6}
+.auth{padding:28px 22px;max-width:430px;width:100%;margin:auto}.auth h1{color:var(--blue);margin:0 0 8px}.auth p{color:var(--muted);font-size:14px;line-height:1.5}.field{display:block;width:100%;border:1px solid #dfe4ec;border-radius:12px;padding:13px;margin:10px 0;outline-color:var(--blue)}.auth-actions{display:flex;gap:8px;margin-top:12px}.auth-actions button{flex:1}.hint{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
+.conversation{display:none;position:absolute;inset:0;background:#fff;z-index:5;flex-direction:column}.conv-head{height:68px;display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);flex-shrink:0}.back{background:none;font-size:28px;padding:3px 7px;color:var(--blue)}.conv-head .avatar{width:43px;height:43px}.conv-person{flex:1;min-width:0}.conv-person strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.conv-person small{font-size:11px;color:#24a899}.messages{flex:1;overflow-y:auto;padding:16px 13px;display:flex;flex-direction:column;gap:9px}.day{text-align:center;color:#969ba4;font-size:11px;margin:5px 0 10px}.msg{max-width:82%;padding:10px 12px;border-radius:18px;background:#f0f2f6;align-self:flex-start;overflow-wrap:anywhere;line-height:1.4;font-size:15px}.msg.mine{background:var(--blue);color:#fff;align-self:flex-end;border-bottom-right-radius:5px}.msg:not(.mine){border-bottom-left-radius:5px}.msg img,.msg video{display:block;max-width:100%;max-height:300px;border-radius:12px}.msg a{color:inherit}.msg-time{text-align:right;font-size:10px;opacity:.65;margin-top:4px}.composer{display:flex;align-items:flex-end;gap:7px;padding:9px 9px calc(9px + env(safe-area-inset-bottom));border-top:1px solid var(--line);flex-shrink:0}.attach{font-size:23px;color:var(--blue);background:none;padding:8px 4px}.compose{flex:1;min-width:0;background:#f1f3f7;border-radius:22px;padding:0 13px}.compose textarea{resize:none;border:0;outline:0;background:transparent;width:100%;padding:12px 0;max-height:100px}.send{width:41px;height:41px;border-radius:50%;background:var(--blue);color:#fff;font-size:18px;flex-shrink:0}.status{font-size:11px;color:var(--muted);padding:5px 12px;text-align:center}.toast{position:absolute;bottom:80px;left:15px;right:15px;background:#20242b;color:#fff;border-radius:12px;padding:12px;font-size:13px;display:none;z-index:20}.hidden{display:none!important}
+@media(min-width:521px){body{padding:12px 0}.app{height:calc(100dvh - 24px);border-radius:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header><div class="brand">NK MESSENGER</div><button class="btn light hidden" id="profileBtn">প্রোফাইল</button><span class="user-email" id="userEmail"></span><button class="btn light hidden" id="logoutBtn">লগআউট</button></header>
+  <section id="authView" class="auth">
+    <h1>NK MESSENGER</h1><p>আপনার অ্যাকাউন্টে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p>
+    <input class="field" id="email" type="email" autocomplete="email" placeholder="ইমেইল ঠিকানা" required>
+    <input class="field" id="password" type="password" autocomplete="current-password" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)" required>
+    <div class="auth-actions"><button class="btn primary" id="loginBtn">লগইন</button><button class="btn" id="registerBtn">নতুন অ্যাকাউন্ট</button></div>
+    <div class="hint">এই অ্যাপটি Firebase দিয়ে রিয়েল-টাইম মেসেজ, ছবি ও ভিডিও পাঠায়। প্রথমে নিচের README ফাইলের Firebase সেটআপ সম্পন্ন করুন।</div>
+  </section>
+  <section id="profileView" class="hidden" style="padding:24px 20px;overflow:auto">
+    <button class="btn light" id="profileBackBtn">← চ্যাটে ফিরুন</button>
+    <h2 style="margin:18px 0 6px">আমার প্রোফাইল</h2>
+    <p style="color:var(--muted);font-size:13px;line-height:1.5">আপনার নাম ও প্রোফাইল ছবি এখানে পরিবর্তন করুন। পরিবর্তনটি Firebase-এ সংরক্ষিত হবে।</p>
+    <div style="display:flex;align-items:center;gap:16px;margin:18px 0">
+      <div class="avatar" id="profilePreview" style="width:88px;height:88px;font-size:25px">U</div>
+      <div><button class="btn" type="button" id="chooseAvatarBtn">ছবি নির্বাচন</button><input id="avatarFile" type="file" accept="image/*" hidden><div class="hint">JPG, PNG বা WEBP; সর্বোচ্চ 5 MB</div></div>
+    </div>
+    <label for="displayNameInput" style="font-size:13px;font-weight:700">নাম</label>
+    <input class="field" id="displayNameInput" maxlength="60" placeholder="আপনার নাম">
+    <label for="profileEmail" style="font-size:13px;font-weight:700">ইমেইল</label>
+    <input class="field" id="profileEmail" disabled>
+    <button class="btn primary" id="saveProfileBtn" style="width:100%;margin-top:8px">পরিবর্তন সংরক্ষণ</button>
+    <div class="hint">এখানে পরিবর্তন করলে চ্যাটের প্রোফাইল নাম ও ছবি আপডেট হবে। ইমেইল পরিবর্তনের সুবিধা এই সংস্করণে নেই।</div>
+  </section>
+  <section id="homeView" class="hidden" style="display:flex;flex:1;min-height:0;flex-direction:column">
+    <div class="search"><span style="font-size:20px">⌕</span><input id="search" placeholder="চ্যাট খুঁজুন"></div>
+    <div class="toolbar"><button class="active">সব চ্যাট</button><button id="newChatBtn">＋ নতুন চ্যাট</button></div>
+    <div class="list" id="chatList"><div class="empty">আপনার চ্যাট এখানে দেখা যাবে। নতুন চ্যাট শুরু করুন।</div></div>
+  </section>
+  <section class="conversation" id="conversation">
+    <div class="conv-head"><button class="back" id="backBtn">‹</button><div class="avatar" id="convAvatar">C</div><div class="conv-person"><strong id="convName">চ্যাট</strong><small id="presence">রিয়েল-টাইম চ্যাট</small></div></div>
+    <div class="messages" id="messages"><div class="day">মেসেজ</div></div>
+    <div class="status" id="uploadStatus"></div>
+    <form class="composer" id="composer"><button type="button" class="attach" id="attachBtn" title="ছবি বা ভিডিও">＋</button><input id="fileInput" type="file" accept="image/*,video/*" multiple hidden><div class="compose"><textarea id="messageInput" rows="1" placeholder="মেসেজ লিখুন…"></textarea></div><button class="send" type="submit" title="পাঠান">➤</button></form>
+  </section>
+  <div class="toast" id="toast"></div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+
+/* Firebase Console > Project settings > Your apps থেকে নিজের config বসান। */
+const firebaseConfig = {
+  apiKey: "AIzaSyAGYeKatfsUbzlVgt25imd9I8ebQ5JGN2E",
+  authDomain: "movie-website-3b7d8.firebaseapp.com",
+  databaseURL: "https://movie-website-3b7d8-default-rtdb.firebaseio.com",
+  projectId: "movie-website-3b7d8",
+  storageBucket: "movie-website-3b7d8.firebasestorage.app",
+  messagingSenderId: "1007883659248",
+  appId: "1:1007883659248:web:d23696ae40958c15391f35",
+  measurementId: "G-8KNR8RD61B"
+};
+
+const $ = id => document.getElementById(id);
+let app, auth, db, storage, me=null, myProfile={displayName:"",photoURL:""}, chatsUnsub=null, messagesUnsub=null, currentChat=null, chatCache=[], toastTimer;
+const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("PASTE_") && firebaseConfig.projectId && !firebaseConfig.projectId.startsWith("PASTE_");
+function toast(msg){$("toast").textContent=msg;$("toast").style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").style.display="none",4200)}
+function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function initials(email=""){return (email.split("@")[0]||"U").slice(0,2).toUpperCase()}
+function timeOf(ts){try{return ts?.toDate?ts.toDate().toLocaleTimeString("bn-BD",{hour:"2-digit",minute:"2-digit"}):""}catch{return""}}
+function niceError(e){const map={"auth/invalid-credential":"ইমেইল বা পাসওয়ার্ড সঠিক নয়।","auth/email-already-in-use":"এই ইমেইলে অ্যাকাউন্ট আছে।","auth/weak-password":"পাসওয়ার্ড অন্তত ৬ অক্ষরের দিন।","auth/invalid-email":"সঠিক ইমেইল লিখুন.","auth/too-many-requests":"অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন.","permission-denied":"Firebase Rules পরীক্ষা করুন।"};return map[e.code]||e.message||"কিছু একটা সমস্যা হয়েছে।"}
+function showAuth(){ $("authView").classList.remove("hidden");$("homeView").classList.add("hidden");$("profileView").classList.add("hidden");$("logoutBtn").classList.add("hidden");$("profileBtn").classList.add("hidden");$("conversation").style.display="none";$("userEmail").textContent=""}
+function showHome(){ $("authView").classList.add("hidden");$("profileView").classList.add("hidden");$("homeView").classList.remove("hidden");$("homeView").style.display="flex";$("logoutBtn").classList.remove("hidden");$("profileBtn").classList.remove("hidden");$("userEmail").textContent=myProfile.displayName||me.email||"";$("conversation").style.display="none";currentChat=null}
+async function ensureProfile(user){
+  const profileRef=doc(db,"users",user.uid);
+  const existing=await getDoc(profileRef);
+  const old=existing.exists()?existing.data():{};
+  myProfile={displayName:old.displayName||user.displayName||user.email?.split("@")[0]||"User",photoURL:old.photoURL||user.photoURL||""};
+  await setDoc(profileRef,{uid:user.uid,email:(user.email||"").toLowerCase(),displayName:myProfile.displayName,photoURL:myProfile.photoURL,updatedAt:serverTimestamp()},{merge:true});
+}
+function subscribeChats(){if(chatsUnsub)chatsUnsub();const q=query(collection(db,"chats"),where("participants","array-contains",me.uid));chatsUnsub=onSnapshot(q,snap=>{chatCache=snap.docs.map(d=>({id:d.id,...d.data(),otherName:d.data().participantNames?.[(d.data().participants||[]).find(uid=>uid!==me.uid)]||d.data().otherName,otherPhoto:d.data().participantPhotos?.[(d.data().participants||[]).find(uid=>uid!==me.uid)]||d.data().otherPhoto}));renderChats()},err=>toast("চ্যাট লোড হয়নি: "+niceError(err)))}
+function otherUid(c){return (c.participants||[]).find(uid=>uid!==me.uid)}
+function displayOther(c){return c.otherName||c.otherEmail||"চ্যাট"}
+function renderChats(){const search=$("search").value.trim().toLowerCase();const list=chatCache.filter(c=>(displayOther(c)).toLowerCase().includes(search)||(c.otherEmail||"").toLowerCase().includes(search)||(c.lastText||"").toLowerCase().includes(search)).sort((a,b)=>(b.updatedAt?.toMillis?.()||0)-(a.updatedAt?.toMillis?.()||0));$("chatList").innerHTML=list.length?list.map(c=>`<div class="chat-row" data-id="${esc(c.id)}"><div class="avatar">${c.otherPhoto?`<img src="${esc(c.otherPhoto)}" alt="">`:esc(initials(displayOther(c)))}</div><div class="info"><div class="name">${esc(displayOther(c))}</div><div class="preview">${esc(c.lastText||"এখন চ্যাট শুরু করুন")}</div></div><div class="stamp">${timeOf(c.updatedAt)}</div></div>`).join(""):`<div class="empty">কোনো চ্যাট নেই।<br>＋ নতুন চ্যাট চেপে অপর ব্যক্তির নিবন্ধিত ইমেইল দিন।</div>`;$("chatList").querySelectorAll(".chat-row").forEach(el=>el.onclick=()=>openChat(el.dataset.id))}
+async function startNewChat(){const email=prompt("যার সঙ্গে চ্যাট করবেন তার নিবন্ধিত ইমেইল লিখুন:");if(!email)return;const normalized=email.trim().toLowerCase();if(normalized===me.email?.toLowerCase()){toast("নিজের ইমেইল দিয়ে চ্যাট শুরু করা যাবে না।");return}try{const found=await getDocs(query(collection(db,"users"),where("email","==",normalized)));if(found.empty){toast("এই ইমেইলে কোনো অ্যাকাউন্ট পাওয়া যায়নি। আগে তাকে অ্যাকাউন্ট খুলতে বলুন।");return}const recipient=found.docs[0].data();const existing=chatCache.find(c=>c.participants?.includes(recipient.uid));if(existing){openChat(existing.id);return}const participants=[me.uid,recipient.uid].sort();const id=participants.join("_");const chatRef=doc(db,"chats",id);
+await setDoc(chatRef,{participants,participantEmails:{[me.uid]:me.email,[recipient.uid]:recipient.email},participantNames:{[me.uid]:myProfile.displayName,[recipient.uid]:recipient.displayName||recipient.email.split("@")[0]},participantPhotos:{[me.uid]:myProfile.photoURL||"",[recipient.uid]:recipient.photoURL||""},otherEmail:recipient.email,otherName:recipient.displayName||recipient.email.split("@")[0],otherPhoto:recipient.photoURL||"",lastText:"",createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+openChat(id)}catch(e){toast("চ্যাট তৈরি হয়নি: "+niceError(e))}}
+function openChat(id){const c=chatCache.find(x=>x.id===id);if(!c){toast("চ্যাটটি লোড হচ্ছে, আবার চেষ্টা করুন।");return}currentChat=c;$("convName").textContent=displayOther(c);$("convAvatar").innerHTML=c.otherPhoto?`<img src="${esc(c.otherPhoto)}" alt="">`:esc(initials(displayOther(c)));$("conversation").style.display="flex";if(messagesUnsub)messagesUnsub();const q=query(collection(db,"chats",id,"messages"),orderBy("createdAt","asc"));messagesUnsub=onSnapshot(q,snap=>{const msgs=snap.docs.map(d=>({id:d.id,...d.data()}));renderMessages(msgs)},err=>toast("মেসেজ লোড হয়নি: "+niceError(err)))}
+function renderMessages(msgs){$("messages").innerHTML='<div class="day">রিয়েল-টাইম মেসেজ</div>'+msgs.map(m=>{let body="";if(m.type==="image")body=`<a href="${esc(m.url)}" target="_blank" rel="noopener"><img src="${esc(m.url)}" alt="ছবি" loading="lazy"></a>`;else if(m.type==="video")body=`<video src="${esc(m.url)}" controls playsinline preload="metadata"></video>`;else body=esc(m.text||"");return `<div class="msg ${m.senderId===me.uid?"mine":""}">${body}<div class="msg-time">${timeOf(m.createdAt)} ${m.senderId===me.uid?"✓✓":""}</div></div>`}).join("");$("messages").scrollTop=$("messages").scrollHeight}
+async function sendText(text){if(!currentChat||!text.trim())return;const chatRef=doc(db,"chats",currentChat.id);await addDoc(collection(chatRef,"messages"),{senderId:me.uid,type:"text",text:text.trim(),createdAt:serverTimestamp()});await setDoc(chatRef,{lastText:text.trim().slice(0,120),updatedAt:serverTimestamp()},{merge:true})}
+async function sendFile(file){if(!currentChat)return;if(file.size>50*1024*1024){toast("ফাইল ৫০ MB-এর কম হতে হবে।");return}if(!file.type.startsWith("image/")&&!file.type.startsWith("video/")){toast("শুধু ছবি বা ভিডিও পাঠানো যাবে।");return}const type=file.type.startsWith("image/")?"image":"video";const path=`chatUploads/${currentChat.id}/${me.uid}/${Date.now()}_${file.name.replace(/[^\w.\-]/g,"_")}`;const task=uploadBytesResumable(ref(storage,path),file,{contentType:file.type});$("uploadStatus").textContent="আপলোড হচ্ছে: 0%";await new Promise((resolve,reject)=>task.on("state_changed",s=>{$("uploadStatus").textContent=`আপলোড হচ্ছে: ${Math.round(s.bytesTransferred/s.totalBytes*100)}%`},reject,resolve));const url=await getDownloadURL(task.snapshot.ref);const chatRef=doc(db,"chats",currentChat.id);await addDoc(collection(chatRef,"messages"),{senderId:me.uid,type,url,fileName:file.name,createdAt:serverTimestamp()});await setDoc(chatRef,{lastText:type==="image"?"📷 ছবি পাঠিয়েছেন":"🎥 ভিডিও পাঠিয়েছেন",updatedAt:serverTimestamp()},{merge:true});$("uploadStatus").textContent="";toast("মিডিয়া পাঠানো হয়েছে।")}
+function renderProfileForm(){
+  $("displayNameInput").value=myProfile.displayName||"";
+  $("profileEmail").value=me?.email||"";
+  $("profilePreview").innerHTML=myProfile.photoURL?`<img src="${esc(myProfile.photoURL)}" alt="প্রোফাইল">`:esc(initials(myProfile.displayName||me?.email||"U"));
+}
+function openProfile(){
+  $("homeView").classList.add("hidden");$("profileView").classList.remove("hidden");$("conversation").style.display="none";renderProfileForm();
+}
+$("profileBtn").onclick=openProfile;
+$("profileBackBtn").onclick=()=>{showHome();renderChats()};
+$("chooseAvatarBtn").onclick=()=>$("avatarFile").click();
+$("avatarFile").onchange=async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  if(!f.type.startsWith("image/")){toast("একটি ছবি নির্বাচন করুন।");e.target.value="";return}
+  if(f.size>5*1024*1024){toast("ছবির আকার 5 MB-এর কম হতে হবে।");e.target.value="";return}
+  $("profilePreview").innerHTML=`<img src="${URL.createObjectURL(f)}" alt="প্রিভিউ">`;
+  $("profilePreview").dataset.pendingFile="yes";
+  $("profilePreview")._pendingFile=f;
+};
+$("saveProfileBtn").onclick=async()=>{
+  const name=$("displayNameInput").value.trim();
+  if(!name){toast("নাম লিখুন।");return}
+  if(name.length>60){toast("নাম ৬০ অক্ষরের মধ্যে রাখুন।");return}
+  const btn=$("saveProfileBtn");btn.disabled=true;btn.textContent="সংরক্ষণ হচ্ছে…";
+  try{
+    let photoURL=myProfile.photoURL||"";
+    const file=$("profilePreview")._pendingFile;
+    if(file){
+      const task=uploadBytesResumable(ref(storage,`profilePhotos/${me.uid}/${Date.now()}_${file.name.replace(/[^\\w.\\-]/g,"_")}`),file,{contentType:file.type});
+      await new Promise((resolve,reject)=>task.on("state_changed",s=>{},reject,resolve));
+      photoURL=await getDownloadURL(task.snapshot.ref);
+    }
+    await updateProfile(me,{displayName:name,photoURL:photoURL||null});
+    await setDoc(doc(db,"users",me.uid),{uid:me.uid,email:(me.email||"").toLowerCase(),displayName:name,photoURL,updatedAt:serverTimestamp()},{merge:true});
+    myProfile={displayName:name,photoURL};
+    // Refresh this user's display fields on all their chat documents.
+    const snap=await getDocs(query(collection(db,"chats"),where("participants","array-contains",me.uid)));
+    for(const d of snap.docs){
+      const c=d.data(), other=(c.participants||[]).find(uid=>uid!==me.uid);
+      const update={};
+      update[`participantNames.${me.uid}`]=name;
+      update[`participantPhotos.${me.uid}`]=photoURL;
+      if(other){
+        update.otherName=c.participantNames?.[other]||c.otherName||c.otherEmail||"চ্যাট";
+        update.otherPhoto=c.participantPhotos?.[other]||c.otherPhoto||"";
+      }
+      await setDoc(d.ref,update,{merge:true});
+    }
+    // Tell existing conversation partners to refresh their display profile from the public user document.
+    toast("প্রোফাইল আপডেট হয়েছে।");
+    $("userEmail").textContent=name;
+    if(currentChat){$("convName").textContent=displayOther(currentChat)}
+    renderChats();renderProfileForm();
+    $("profilePreview")._pendingFile=null;delete $("profilePreview").dataset.pendingFile;
+  }catch(err){toast("প্রোফাইল আপডেট হয়নি: "+niceError(err))}
+  finally{btn.disabled=false;btn.textContent="পরিবর্তন সংরক্ষণ"}
+};
+$("loginBtn").onclick=async()=>{if(!configured)return toast("আগে index.html-এ Firebase config বসান।");try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value)}catch(e){toast(niceError(e))}};
+$("registerBtn").onclick=async()=>{if(!configured)return toast("আগে index.html-এ Firebase config বসান।");try{const cred=await createUserWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);await ensureProfile(cred.user);toast("অ্যাকাউন্ট তৈরি হয়েছে।")}catch(e){toast(niceError(e))}};
+$("logoutBtn").onclick=()=>signOut(auth).catch(e=>toast(niceError(e)));
+$("newChatBtn").onclick=startNewChat;$("search").oninput=renderChats;
+$("backBtn").onclick=()=>{$("conversation").style.display="none";currentChat=null;if(messagesUnsub){messagesUnsub();messagesUnsub=null}};
+$("composer").onsubmit=async e=>{e.preventDefault();const input=$("messageInput"),text=input.value.trim();if(!text)return;input.value="";input.style.height="auto";try{await sendText(text)}catch(err){toast("মেসেজ পাঠানো যায়নি: "+niceError(err));input.value=text}};
+$("messageInput").oninput=e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,100)+"px"};
+$("attachBtn").onclick=()=>{if(!currentChat)return toast("আগে একটি চ্যাট খুলুন।");$("fileInput").click()};
+$("fileInput").onchange=async e=>{for(const f of Array.from(e.target.files||[])){try{await sendFile(f)}catch(err){toast("ফাইল পাঠানো যায়নি: "+niceError(err));$("uploadStatus").textContent=""}}e.target.value=""};
+if(!configured){toast("Firebase সেটআপ বাকি: README ফাইল অনুসরণ করুন।")}else{try{app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);storage=getStorage(app);onAuthStateChanged(auth,async user=>{me=user;if(user){try{await ensureProfile(user)}catch(e){console.warn(e)}showHome();subscribeChats()}else{if(chatsUnsub){chatsUnsub();chatsUnsub=null}if(messagesUnsub){messagesUnsub();messagesUnsub=null}showAuth()}})}catch(e){toast("Firebase config পরীক্ষা করুন।")}}
+</script>
+</body>
+</html>
